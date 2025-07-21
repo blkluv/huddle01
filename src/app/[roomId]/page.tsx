@@ -25,12 +25,13 @@ import { metadata } from '../layout';
 // import Chat from '@/components/Chat/Chat';
 
 const Home = ({ params }: { params: { roomId: string } }) => {
+  const { push } = useRouter();
+  const { roomId } = React.use(params);
   const { state } = useRoom({
     onLeave: () => {
-      push(`/${params.roomId}/lobby`);
+      push(`/${roomId}/lobby`);
     },
   });
-  const { push } = useRouter();
   // const { changePeerRole } = useAcl();
   const [requestedPeerId, setRequestedPeerId] = useState('');
   const { showAcceptRequest, setShowAcceptRequest } = useStore();
@@ -52,7 +53,7 @@ const Home = ({ params }: { params: { roomId: string } }) => {
 
   useEffect(() => {
     if (state === 'idle') {
-      push(`/${params.roomId}/lobby`);
+      push(`/${roomId}/lobby`);
       return;
     }
     updateMetadata({
@@ -92,17 +93,19 @@ const Home = ({ params }: { params: { roomId: string } }) => {
   }, [requestedPeers]);
 
   return (
-    <section className="bg-audio flex h-screen items-center justify-center w-full relative  text-slate-100">
-      <div className="flex items-center justify-center w-full">
+    <section className="bg-audio flex h-screen items-center justify-center w-full relative text-slate-100" style={{ color: 'white' }}>
+      <div className="flex items-center justify-center w-full" style={{ color: 'white' }}>
         <GridLayout />
         <Sidebar />
-        <div className="absolute right-4 bottom-20">
+        <div className="absolute right-4 bottom-20" style={{ color: 'white' }}>
           {showAcceptRequest && <AcceptRequest peerId={requestedPeerId} />}
         </div>
       </div>
       {isChatOpen && <Chat />}
-      <BottomBar />
+      {/* BottomBar is positioned at the bottom of the page */}
+      
       <Prompts />
+      <BottomBar />
     </section>
   );
 };

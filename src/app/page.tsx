@@ -9,17 +9,27 @@ interface RoomDetails {
 }
 
 const createRandomRoom = async () => {
-  const res = await fetch('https://api.huddle01.com/api/v1/create-room', {
+  const res = await fetch('https://api.huddle01.com/api/v2/sdk/rooms/create-room', {
     method: 'POST',
     body: JSON.stringify({
-      title: 'Test Room',
-    }),
+    roomLocked: false,
+     metadata: {
+    title: 'Test Room',
+  },
+})
+,
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': process.env.API_KEY ?? '',
     },
     cache: 'no-store',
   });
+
+  if (!res.ok) {
+  const errorText = await res.text();
+  throw new Error(`API error: ${errorText}`);
+}
+
   const data: RoomDetails = await res.json();
   const { roomId } = data.data;
   return roomId;

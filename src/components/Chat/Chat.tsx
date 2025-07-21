@@ -85,6 +85,7 @@ const Chat = () => {
             type="text"
             placeholder="Type a message"
             className="p-2 rounded-lg w-full bg-[#343744] text-sm"
+            style={{ color: 'white' }}
             value={message}
             onChange={handleChange}
             onKeyDown={handleKeyDown}

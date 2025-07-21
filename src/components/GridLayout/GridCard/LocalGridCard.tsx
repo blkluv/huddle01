@@ -3,6 +3,8 @@ import Image from 'next/image';
 
 // Assets
 import { BasicIcons } from '@/assets/BasicIcons';
+import { NestedBasicIcons } from '@/assets/BasicIcons';
+import { useLocalAudio } from '@huddle01/react/hooks';
 import { useDataMessage, useLocalPeer } from '@huddle01/react/hooks';
 import { getFallbackAvatar } from '@/utils/helpers';
 
@@ -19,6 +21,13 @@ const LocalGridCard: FC = () => {
     isHandRaised: boolean;
   }>();
 
+  const {
+    enableAudio,
+    disableAudio,
+    isAudioOn,
+    stream: micStream,
+  } = useLocalAudio();
+
   useDataMessage({
     onMessage(payload, from, label) {
       if (from === localPeerId) {
@@ -33,16 +42,18 @@ const LocalGridCard: FC = () => {
   });
 
   return (
-    <div className="relative flex items-center justify-center flex-col">
-      <Image
-        src={metadata?.avatarUrl || getFallbackAvatar()}
-        alt="default-avatar"
-        width={100}
-        height={100}
-        quality={100}
-        priority
-        className="maskAvatar"
-      />
+    <div className="relative items-center justify-center flex-col">
+      <div className="relative">
+        <Image
+          src={metadata?.avatarUrl || getFallbackAvatar()}
+          alt="default-avatar"
+          width={100}
+          height={100}
+          quality={100}
+          priority
+          className="maskAvatar"
+        />
+      </div>
 
       <div className="mt-1 text-center">
         <div className="text-custom-5 text-base font-medium">
@@ -50,6 +61,7 @@ const LocalGridCard: FC = () => {
         </div>
         <div className="text-custom-6 text-sm font-normal">{role}</div>
       </div>
+      {/* Only show reaction, audio, and hand raise indicators, not duplicate controls */}
       <div className="absolute left-1/2 bottom-1/2 -translate-x-1/2 mb-2 text-4xl">
         {reaction}
       </div>

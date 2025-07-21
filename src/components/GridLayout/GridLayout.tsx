@@ -11,20 +11,19 @@ const GridLayout: React.FC<GridLayoutProps> = () => {
   const { peerIds } = usePeerIds({ roles: [Role.LISTENER] });
   const { role: localPeerRole } = useLocalPeer();
 
-  return (
-    <div className="w-full h-full ml-10 flex items-center justify-center flex-col py-20">
-      <div className="flex-wrap flex items-center justify-center gap-4 w-full">
-        <Hosts />
-        <CoHosts />
-        <Speakers />
-      </div>
-      <div className="mt-10">
-        <div className="text-custom-6 text-base font-normal text-center mb-5">
+  return (    <div className="w-full h-full flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center justify-center w-full">
+        <div className="flex items-center justify-center gap-8 mb-8">
+          <Hosts />
+          <CoHosts />
+          <Speakers />
+        </div>
+        <div className="text-white text-lg font-medium text-center mb-4">
           Listeners -{' '}
           {peerIds.length +
             (localPeerRole && localPeerRole === Role.LISTENER ? 1 : 0)}
         </div>
-        <div className="flex-wrap flex items-center justify-center gap-4 w-full">
+        <div className="flex items-center justify-center gap-8 w-full">
           <Listeners />
         </div>
       </div>

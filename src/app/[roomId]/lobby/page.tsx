@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 
 // Assets
@@ -20,7 +20,13 @@ import { useRoom } from '@huddle01/react/hooks';
 
 type TLobboyProps = { params: { roomId: string } };
 
+
 const Lobby = ({ params }: TLobboyProps) => {
+  // Unwrap params Promise using React.use()
+  // const unwrappedParams = use(params);
+  // const roomId = unwrappedParams.roomId;
+  const { roomId } = React.use(params);
+
   // Local States
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const avatarUrl = useStore((state) => state.avatarUrl);
@@ -38,17 +44,18 @@ const Lobby = ({ params }: TLobboyProps) => {
     let token = '';
     if (state !== 'connected') {
       const response = await fetch(
-        `/token?roomId=${params.roomId}&name=${userDisplayName}`,
+        `/token?roomId=${roomId}&name=${userDisplayName}`,
       );
       token = await response.text();
     }
 
     if (!userDisplayName.length) {
       toast.error('Display name is required!');
+      setIsJoining(false);
       return;
     }
     await joinRoom({
-      roomId: params.roomId,
+      roomId: roomId,
       token,
     });
     setIsJoining(false);
@@ -56,7 +63,7 @@ const Lobby = ({ params }: TLobboyProps) => {
 
   useEffect(() => {
     if (state === 'connected') {
-      push(`/${params.roomId}`);
+      push(`/${roomId}`);
     }
   }, [state]);
 
@@ -125,8 +132,8 @@ const Lobby = ({ params }: TLobboyProps) => {
         </div>
         <div className="flex items-center w-full flex-col">
           <div className="flex flex-col justify-center w-full gap-1">
-            Set a display name
-            <div className="flex w-full items-center rounded-[10px] border px-3 text-slate-300 outline-none border-zinc-800 backdrop-blur-[400px] focus-within:border-slate-600 gap-">
+            <span className="text-white" style={{ color: 'white' }}>Set a display name</span>
+            <div className="flex w-full items-center rounded-[10px] border px-3 text-white outline-none border-zinc-800 backdrop-blur-[400px] focus-within:border-slate-600 gap-2">
               <div className="mr-2">
                 <Image
                   alt="user-icon"
@@ -144,7 +151,8 @@ const Lobby = ({ params }: TLobboyProps) => {
                 onKeyDown={(e) => e.key === 'Enter' && handleStartSpaces()}
                 type="text"
                 placeholder="Enter your name"
-                className="flex-1 bg-transparent py-3 outline-none"
+                className="flex-1 bg-transparent py-3 outline-none text-white placeholder:text-slate-400"
+                style={{ color: 'white' }}
               />
             </div>
           </div>
@@ -153,6 +161,7 @@ const Lobby = ({ params }: TLobboyProps) => {
           <button
             className="flex items-center justify-center bg-[#246BFD] text-slate-100 rounded-md p-2 mt-2 w-full"
             onClick={handleStartSpaces}
+            disabled={isJoining || !userDisplayName.length}
           >
             {isJoining ? 'Joining Spaces...' : 'Start Spaces'}
             {!isJoining && (

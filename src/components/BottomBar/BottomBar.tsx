@@ -59,7 +59,7 @@ const BottomBar: React.FC<BottomBarProps> = () => {
   const [showLeaveDropDown, setShowLeaveDropDown] = useState<boolean>(false);
 
   return (
-    <div className="absolute bottom-6 w-full flex items-center px-10 justify-between">
+    <div className="fixed inset-x-0 bottom-0 w-full flex items-center px-10 justify-between">
       {/* Bottom Bar Left */}
       <div>
         {role === 'host' || role === 'coHost' || role === 'speaker' ? (
@@ -127,14 +127,17 @@ const BottomBar: React.FC<BottomBarProps> = () => {
           onOpenChange={() => setShowLeaveDropDown((prev) => !prev)}
         >
           {role === 'host' && (
-            <Strip
-              type="close"
-              title="End spaces for all"
-              variant="danger"
-              onClick={() => {
-                closeRoom();
-              }}
-            />
+            <>
+              <Strip
+                type="close"
+                title="End spaces for all"
+                variant="danger"
+                onClick={() => {
+                  closeRoom();
+                }}
+              />
+              <div className="border-t border-gray-700 my-2 w-full" />
+            </>
           )}
           <Strip
             type="leave"

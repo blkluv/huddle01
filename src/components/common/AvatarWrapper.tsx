@@ -14,7 +14,7 @@ const AvatarWrapper: React.FC<Props> = ({ isActive, children, onClick }) => (
     <div
       className={`border-custom-8 bg-custom-8 absolute ${
         isActive ? 'grid rounded-full' : 'hidden'
-      } h-full w-full place-items-center border-2 bg-opacity-75`}
+      } h-full w-full place-items-center border-2 bg-opacity-75 z-10`}
     >
       <svg
         width="17"

@@ -26,7 +26,7 @@ import { metadata } from '../layout';
 
 const Home = ({ params }: { params: { roomId: string } }) => {
   const { push } = useRouter();
-  const { roomId } = React.use(params);
+  const { roomId } = params;
   const { state } = useRoom({
     onLeave: () => {
       push(`/${roomId}/lobby`);

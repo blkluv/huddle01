@@ -21,11 +21,9 @@ import { useRoom } from '@huddle01/react/hooks';
 type TLobboyProps = { params: { roomId: string } };
 
 
-const Lobby = ({ params }: TLobboyProps) => {
-  // Unwrap params Promise using React.use()
-  // const unwrappedParams = use(params);
-  // const roomId = unwrappedParams.roomId;
-  const { roomId } = React.use(params);
+const Lobby = ({ params }: { params: { roomId: string } }) => {
+  // Unwrap params with React.use() for Next.js 15 compatibility
+  const { roomId } = React.use(params) as { roomId: string };
 
   // Local States
   const [isOpen, setIsOpen] = useState<boolean>(false);

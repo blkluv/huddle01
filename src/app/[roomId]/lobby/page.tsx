@@ -38,25 +38,26 @@ const Lobby = ({ params }: { params: { roomId: string } }) => {
   const { joinRoom, state } = useRoom();
 
   const handleStartSpaces = async () => {
-    setIsJoining(true);
-    let token = '';
     if (state !== 'connected') {
+      setIsJoining(true);
+      let token = '';
+      if (!userDisplayName.length) {
+        toast.error('Display name is required!');
+        setIsJoining(false);
+        return;
+      }
       const response = await fetch(
         `/token?roomId=${roomId}&name=${userDisplayName}`,
       );
       token = await response.text();
-    }
-
-    if (!userDisplayName.length) {
-      toast.error('Display name is required!');
+      await joinRoom({
+        roomId: roomId,
+        token,
+      });
       setIsJoining(false);
-      return;
+    } else {
+      toast.error('Already connected to the room!');
     }
-    await joinRoom({
-      roomId: roomId,
-      token,
-    });
-    setIsJoining(false);
   };
 
   useEffect(() => {

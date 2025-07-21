@@ -18,10 +18,10 @@ import useStore from '@/store/slices';
 // Hooks
 import { useRoom } from '@huddle01/react/hooks';
 
-type TLobboyProps = { params: { roomId: string } };
+// Remove unused TLobboyProps type
 
 
-const Lobby = ({ params }: { params: { roomId: string } }) => {
+const Lobby = ({ params }: { params: Promise<{ roomId: string }> }) => {
   // Unwrap params with React.use() for Next.js 15 compatibility
   const { roomId } = React.use(params) as { roomId: string };
 
@@ -64,7 +64,7 @@ const Lobby = ({ params }: { params: { roomId: string } }) => {
     if (state === 'connected') {
       push(`/${roomId}`);
     }
-  }, [state]);
+  }, [state, push, roomId]);
 
   return (
     <main className="flex h-screen flex-col items-center justify-center bg-lobby text-slate-100">

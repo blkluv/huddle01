@@ -1,10 +1,9 @@
 'use client';
 
-import Image from 'next/image';
-import React, { useEffect, useState, use } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
-// Assets
 import { toast } from 'react-hot-toast';
 import { BasicIcons } from '@/assets/BasicIcons';
 
@@ -15,46 +14,40 @@ import AvatarWrapper from '@/components/common/AvatarWrapper';
 // Store
 import useStore from '@/store/slices';
 
-// Hooks
+// Huddle01
 import { useRoom } from '@huddle01/react/hooks';
 
-// Remove unused TLobboyProps type
+const Lobby = ({ params }: { params: { roomId: string } }) => {
+  const { roomId } = params;
 
+  const [isOpen, setIsOpen] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
 
-const Lobby = ({ params }: { params: Promise<{ roomId: string }> }) => {
-  // Unwrap params with React.use() for Next.js 15 compatibility
-  const { roomId } = React.use(params) as { roomId: string };
+  const avatarUrl = useStore((s) => s.avatarUrl);
+  const setAvatarUrl = useStore((s) => s.setAvatarUrl);
+  const userDisplayName = useStore((s) => s.userDisplayName);
+  const setUserDisplayName = useStore((s) => s.setUserDisplayName);
 
-  // Local States
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const avatarUrl = useStore((state) => state.avatarUrl);
-  const setAvatarUrl = useStore((state) => state.setAvatarUrl);
-  const setUserDisplayName = useStore((state) => state.setUserDisplayName);
-  const userDisplayName = useStore((state) => state.userDisplayName);
-  const [isJoining, setIsJoining] = useState<boolean>(false);
-  const { push } = useRouter();
-
-  // Huddle Hooks
   const { joinRoom, state } = useRoom();
+  const { push } = useRouter();
 
   const handleStartSpaces = async () => {
     if (state !== 'connected') {
-      setIsJoining(true);
-      let token = '';
-      if (!userDisplayName.length) {
+      if (!userDisplayName.trim()) {
         toast.error('Display name is required!');
-        setIsJoining(false);
         return;
       }
-      const response = await fetch(
-        `/token?roomId=${roomId}&name=${userDisplayName}`,
-      );
-      token = await response.text();
-      await joinRoom({
-        roomId: roomId,
-        token,
-      });
-      setIsJoining(false);
+
+      setIsJoining(true);
+      try {
+        const res = await fetch(`/token?roomId=${roomId}&name=${userDisplayName}`);
+        const token = await res.text();
+        await joinRoom({ roomId, token });
+      } catch (err) {
+        toast.error('Failed to join room.');
+      } finally {
+        setIsJoining(false);
+      }
     } else {
       toast.error('Already connected to the room!');
     }
@@ -64,15 +57,15 @@ const Lobby = ({ params }: { params: Promise<{ roomId: string }> }) => {
     if (state === 'connected') {
       push(`/${roomId}`);
     }
-  }, [state, push, roomId]);
+  }, [state, roomId]);
 
   return (
     <main className="flex h-screen flex-col items-center justify-center bg-lobby text-slate-100">
-      <div className="flex flex-col items-center justify-center gap-4 w-[26.25rem]">
-        <div className="relative text-center flex items-center justify-center w-fit mx-auto">
+      <div className="flex flex-col items-center gap-4 w-[26.25rem]">
+        <div className="relative text-center">
           <Image
             src={avatarUrl}
-            alt="audio-spaces-img"
+            alt="Avatar"
             width={125}
             height={125}
             className="maskAvatar object-contain"
@@ -82,100 +75,83 @@ const Lobby = ({ params }: { params: Promise<{ roomId: string }> }) => {
           <video
             src={avatarUrl}
             muted
-            className="maskAvatar absolute left-1/2 top-1/2 z-10 h-full w-full -translate-x-1/2 -translate-y-1/2"
-            // autoPlay
             loop
+            className="maskAvatar absolute left-1/2 top-1/2 z-10 h-full w-full -translate-x-1/2 -translate-y-1/2"
           />
           <button
             onClick={() => setIsOpen((prev) => !prev)}
-            type="button"
             className="text-white absolute bottom-0 right-0 z-10"
           >
             {BasicIcons.edit}
           </button>
+
           <FeatCommon
             onClose={() => setIsOpen(false)}
-            className={
-              isOpen
-                ? 'absolute top-4 block'
-                : 'absolute top-1/2 -translate-y-1/2 hidden '
-            }
+            className={`absolute top-4 ${isOpen ? 'block' : 'hidden'}`}
           >
-            <div className="relative mt-5">
-              <div className="grid-cols-3  grid h-full w-full  place-items-center   gap-6  px-6 ">
-                {Array.from({ length: 20 }).map((_, i) => {
-                  const url = `/avatars/avatars/${i}.png`;
-
-                  return (
-                    <AvatarWrapper
-                      key={`sidebar-avatars-${i}`}
-                      isActive={avatarUrl === url}
-                      onClick={() => {
-                        setAvatarUrl(url);
-                      }}
-                    >
-                      <Image
-                        src={url}
-                        alt={`avatar-${i}`}
-                        width={45}
-                        height={45}
-                        loading="lazy"
-                        className="object-contain"
-                      />
-                    </AvatarWrapper>
-                  );
-                })}
-              </div>
+            <div className="grid grid-cols-3 gap-6 px-6 mt-5">
+              {Array.from({ length: 20 }).map((_, i) => {
+                const url = `/avatars/avatars/${i}.png`;
+                return (
+                  <AvatarWrapper
+                    key={i}
+                    isActive={avatarUrl === url}
+                    onClick={() => setAvatarUrl(url)}
+                  >
+                    <Image
+                      src={url}
+                      alt={`Avatar ${i}`}
+                      width={45}
+                      height={45}
+                      className="object-contain"
+                    />
+                  </AvatarWrapper>
+                );
+              })}
             </div>
           </FeatCommon>
         </div>
-        <div className="flex items-center w-full flex-col">
-          <div className="flex flex-col justify-center w-full gap-1">
-            <span className="text-white" style={{ color: 'white' }}>Set a display name</span>
-            <div className="flex w-full items-center rounded-[10px] border px-3 text-white outline-none border-zinc-800 backdrop-blur-[400px] focus-within:border-slate-600 gap-2">
-              <div className="mr-2">
-                <Image
-                  alt="user-icon"
-                  src="/images/user-icon.svg"
-                  className="w-5 h-5"
-                  width={30}
-                  height={30}
-                />
-              </div>
-              <input
-                value={userDisplayName}
-                onChange={(e) => {
-                  setUserDisplayName(e.target.value);
-                }}
-                onKeyDown={(e) => e.key === 'Enter' && handleStartSpaces()}
-                type="text"
-                placeholder="Enter your name"
-                className="flex-1 bg-transparent py-3 outline-none text-white placeholder:text-slate-400"
-                style={{ color: 'white' }}
-              />
-            </div>
+
+        <div className="flex flex-col w-full items-center">
+          <label className="text-white mb-2">Set a display name</label>
+          <div className="flex w-full items-center rounded-[10px] border px-3 text-white border-zinc-800 backdrop-blur focus-within:border-slate-600 gap-2">
+            <Image
+              alt="User icon"
+              src="/images/user-icon.svg"
+              width={20}
+              height={20}
+              className="w-5 h-5"
+            />
+            <input
+              type="text"
+              placeholder="Enter your name"
+              value={userDisplayName}
+              onChange={(e) => setUserDisplayName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleStartSpaces()}
+              className="flex-1 bg-transparent py-3 outline-none placeholder:text-slate-400 text-white"
+            />
           </div>
         </div>
-        <div className="flex items-center w-full">
-          <button
-            className="flex items-center justify-center bg-[#246BFD] text-slate-100 rounded-md p-2 mt-2 w-full"
-            onClick={handleStartSpaces}
-            disabled={isJoining || !userDisplayName.length}
-          >
-            {isJoining ? 'Joining Spaces...' : 'Start Spaces'}
-            {!isJoining && (
-              <Image
-                alt="narrow-right"
-                width={30}
-                height={30}
-                src="/images/arrow-narrow-right.svg"
-                className="w-6 h-6 ml-1"
-              />
-            )}
-          </button>
-        </div>
+
+        <button
+          className="flex items-center justify-center bg-[#246BFD] text-slate-100 rounded-md p-2 mt-2 w-full"
+          onClick={handleStartSpaces}
+          disabled={isJoining || !userDisplayName.trim()}
+        >
+          {isJoining ? 'Joining Spaces...' : 'Start Spaces'}
+          {!isJoining && (
+            <Image
+              alt="Arrow right"
+              src="/images/arrow-narrow-right.svg"
+              width={24}
+              height={24}
+              className="ml-2"
+            />
+          )}
+        </button>
       </div>
     </main>
   );
 };
+
 export default Lobby;
